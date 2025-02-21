@@ -3,6 +3,7 @@ import 'package:ecommerce_front/main.dart';
 import 'package:ecommerce_front/screens/login_screen.dart';
 import 'package:ecommerce_front/utils/app_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import '../models/product.dart';
 
@@ -28,7 +29,8 @@ class ProductRepository {
 
   Future<Product> fechProductById(int id) async {
     final headers = await _getHeaders();
-    final response = await http.get(Uri.parse('$baseUrl/product/$id'), headers: headers);
+    final response =
+        await http.get(Uri.parse('$baseUrl/product/$id'), headers: headers);
 
     if (response.statusCode == 200) {
       return Product.fromJson(jsonDecode(response.body));
@@ -42,7 +44,8 @@ class ProductRepository {
 
   Future<List<Product>> fetchProducts() async {
     final headers = await _getHeaders();
-    final response = await http.get(Uri.parse('$baseUrl/products'), headers: headers);
+    final response =
+        await http.get(Uri.parse('$baseUrl/products'), headers: headers);
 
     if (response.statusCode == 200) {
       List<dynamic> body = jsonDecode(response.body);
@@ -93,7 +96,8 @@ class ProductRepository {
 
   Future<void> deleteProduct(int id) async {
     final headers = await _getHeaders();
-    final response = await http.delete(Uri.parse('$baseUrl/product/$id'), headers: headers);
+    final response =
+        await http.delete(Uri.parse('$baseUrl/product/$id'), headers: headers);
 
     if (response.statusCode == 200) {
       return;
@@ -139,6 +143,50 @@ class ProductRepository {
       throw Exception('Unauthorized');
     } else {
       throw Exception('Failed to send rating');
+    }
+  }
+
+  // Busca perguntas do backend
+  Future<List<Map<String, dynamic>>> fetchProductQuestions(int productId) async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('$baseUrl/question/answer/$productId'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return List<Map<String, dynamic>>.from(data);
+    } else if (response.statusCode == 401) {
+      _handleUnauthorized();
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Failed to load questions');
+    }
+  }
+
+  // Envia uma nova pergunta para o backend
+  Future<void> sendQuestion(int productId, String description) async {
+
+    final body = jsonEncode({
+    "description": description, 
+    "product_id": productId
+  });
+
+    final headers = await _getHeaders();
+    final response = await http.post(
+      Uri.parse('$baseUrl/question/save/'),
+      headers: headers,
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      return;
+    } else if (response.statusCode == 401) {
+      _handleUnauthorized();
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Failed to send question');
     }
   }
 }

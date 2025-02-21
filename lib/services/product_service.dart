@@ -27,4 +27,12 @@ class ProductService {
   Future<void> sendRating(int id, int grade) async {
     await _repository.sendRating(id, grade);
   }
+
+  Future<List<Map<String, dynamic>>> loadQuestions(int id) async {
+    return await _repository.fetchProductQuestions(id);
+  }
+
+  Future<void> sendQuestion(int id, String description) async {
+    await _repository.sendQuestion(id, description);
+  }
 }

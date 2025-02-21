@@ -5,8 +5,10 @@ import '../services/product_service.dart';
 class ProductController extends ChangeNotifier {
   final ProductService _service = ProductService();
   List<Product> _products = [];
+  List<Map<String, dynamic>> _questions = [];
 
   List<Product> get products => _products;
+  List<Map<String, dynamic>> get questions => _questions;
 
   Future<void> loadProducts() async {
     try {
@@ -49,7 +51,8 @@ class ProductController extends ChangeNotifier {
   Future<void> updateProduct(int id, Product product) async {
     try {
       final updatedProduct = await _service.updateProduct(id, product);
-      _products = _products.map((p) => p.id == id ? updatedProduct : p).toList();
+      _products =
+          _products.map((p) => p.id == id ? updatedProduct : p).toList();
       notifyListeners();
     } catch (e) {
       print('Error updating product: $e');
@@ -62,6 +65,24 @@ class ProductController extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print('Error sending rating: $e');
+    }
+  }
+
+  Future<void> loadQuestions(int id) async {
+    try {
+      _questions = await _service.loadQuestions(id);
+      notifyListeners();
+    } catch (e) {
+      print('error loading questions: $e');
+    }
+  }
+
+  Future<void> sendQuestion(int id, String description) async {
+    try {
+      await _service.sendQuestion(id, description);
+      notifyListeners();
+    } catch (e) {
+      print('Error sending questions: $e');
     }
   }
 }
